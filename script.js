@@ -1,53 +1,41 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const themeToggle = document.getElementById('themeToggle');
-  const body = document.body;
-  const mobileToggle = document.getElementById('mobileToggle');
-  const navList = document.querySelector('.nav-list');
+// 1. Mobile Menu Toggle
+function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('active');
+}
 
-  // theme
-  const savedTheme = localStorage.getItem('myblogshub_theme');
-  if (savedTheme) {
-    body.className = savedTheme;
-    updateToggleButton(savedTheme);
-  }
+// 2. Preloader
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    setTimeout(() => {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 1000);
+    }, 1200);
+});
 
-  function updateToggleButton(theme) {
-    if (theme === 'dark-theme') {
-      themeToggle.textContent = 'Light';
+// 3. Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-theme');
+    localStorage.setItem('mbh-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+});
+if(localStorage.getItem('mbh-theme') === 'dark') document.body.classList.add('dark-theme');
+
+// 4. Reveal on Scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// 5. Shrink Nav on Scroll
+window.addEventListener('scroll', () => {
+    const nav = document.querySelector('.nav-wrap');
+    if (window.scrollY > 60) {
+        nav.style.padding = '8px 30px';
+        nav.style.width = '90%';
     } else {
-      themeToggle.textContent = 'Dark';
+        nav.style.padding = '12px 35px';
+        nav.style.width = 'min(95%, 1250px)';
     }
-  }
-
-  if (themeToggle) {
-    themeToggle.addEventListener('click', function() {
-      if (body.classList.contains('light-theme')) {
-        body.classList.replace('light-theme', 'dark-theme');
-        localStorage.setItem('myblogshub_theme', 'dark-theme');
-        updateToggleButton('dark-theme');
-      } else {
-        body.classList.replace('dark-theme', 'light-theme');
-        localStorage.setItem('myblogshub_theme', 'light-theme');
-        updateToggleButton('light-theme');
-      }
-    });
-  }
-
-  // mobile menu
-  if (mobileToggle && navList) {
-    mobileToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      navList.classList.toggle('active');
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!navList.contains(e.target) && !mobileToggle.contains(e.target) && navList.classList.contains('active')) {
-        navList.classList.remove('active');
-      }
-    });
-
-    document.querySelectorAll('.nav-list a').forEach(link => {
-      link.addEventListener('click', () => navList.classList.remove('active'));
-    });
-  }
 });
